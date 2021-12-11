@@ -1,0 +1,58 @@
+def remote = [:]
+    remote.name = 'test'
+    remote.host = '192.168.33.20'
+    remote.user = 'ansible'
+    remote.password = '12345'
+    remote.allowAnyHosts = true
+
+    def ansible = [:]
+    ansible.name = 'ansibletest'
+    ansible.host = '192.168.33.15'
+    ansible.user = 'ansible'
+    ansible.password = '12345'
+    ansible.allowAnyHosts = true
+pipeline {
+    agent any
+
+    tools {
+        
+        maven "maven"
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+               
+                git credentialsId: 'github', url: 'https://gitlab.com/ramakrishnaraj/project.git'
+
+               
+                sh "mvn -Dmaven.test.failure.ignore=true clean package"
+
+                
+            }
+
+            post {
+                
+                success {
+                    
+                    archiveArtifacts 'target/*.war'
+                }
+            }
+        }
+
+        stage('ansible SSH') {
+          steps{
+      sshCommand remote: ansible, command: "ansible-playbook /home/ansible/project/tomcat.yml"
+
+        }  
+      }
+      stage('Remote SSH') {
+          steps{
+      sshCommand remote: remote, sudo: true, command: 'chmod 777 /usr/share/tomcat/webapps'
+      sshPut remote: remote, from: '/var/lib/jenkins/workspace/script/target/project.war', into: '/usr/share/tomcat/webapps/'
+      
+      
+    }  
+      }
+    }
+}

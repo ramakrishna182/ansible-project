@@ -1,0 +1,15 @@
+- hosts: web
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: installing epel
+    yum:
+      name: epel-release
+      state: present
+
+  - name: installing python3
+    yum:
+      name: python36
+      state: present
+

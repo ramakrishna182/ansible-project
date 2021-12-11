@@ -1,0 +1,38 @@
+- hosts: web
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+
+  tasks:
+  - name: installing packages
+    yum: state=present name={{ item }}
+    with_items:
+    - yum-utils 
+    - device-mapper-persistent-data 
+    - lvm2
+
+  - name: creating docker repo
+    get_url:
+      url: https://download.docker.com/linux/centos/docker-ce.repo
+      dest: /etc/yum.repos.d/docker-ce.repo
+    become: yes
+      
+   
+  - name: installing docker-ce
+    yum: state=present name=docker-ce
+
+
+  - name: starting docker
+    service:
+      name: docker
+      state: started
+      enabled: yes
+
+
+  - name: Adding user to docker
+    user:
+      name: ansible
+      group: docker
+      append: yes
+    become: yes
+      
