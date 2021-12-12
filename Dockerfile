@@ -14,7 +14,7 @@ RUN tar xzvf apache-tomcat-7.0.61.tar.gz -C /opt/
 RUN cp -R /opt/apache-tomcat-7.0.61/ /opt/tomcat
 
 WORKDIR /opt/tomcat/webapps
-COPY target/*.war /opt/tomcat/webapps/webapp.war
+COPY *.war /opt/tomcat/webapps/webapp.war
 
 EXPOSE 8080
 
